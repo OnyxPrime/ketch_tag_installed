@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    <head>  
+        <style>
+            .grid-container {
+                display: grid;
+                grid-template-columns: auto auto;
+                width: 50em;
+            }
+            .grid-item {
+                border: 1px solid rgba(0, 0, 0, 0.8);
+                text-align: center;
+                padding: 1em;
+            }
+            .grid-heading {
+                font-weight: bold;
+            }
+            .error {
+                color: red;
+            }
+            </style> 
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>     
+        <script>        
+        function addResultsToPage(results) {
+            var resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = '<div class="grid-item grid-heading">URL</div><div class="grid-item grid-heading">Has Ketch Smart Tag?</div>';
+            for (var i = 0; i < results.length; i++) {
+                var result = results[i];
+                var urlDiv = document.createElement("div");
+                urlDiv.className = "grid-item";
+                urlDiv.innerHTML = `${result.url}`;
+                var resultDiv = document.createElement("div")
+                resultDiv.className = "grid-item";
+                resultDiv.innerHTML = `${result.result}`;
+                resultsDiv.appendChild(urlDiv);
+                resultsDiv.appendChild(resultDiv);
+            }
+        }
+
+        function displayGeneralError(state) {
+            var errorTxt = document.getElementById("error-text");
+            if (state) {
+                errorTxt.style.display = '';
+            } else {
+                errorTxt.style.display = 'none';
+            }
+
+        }
+        
+        async function FetchHtml(siteAddress) 
+        {   try {
+                let res = await axios.get(`api/evaluate?urls=${siteAddress}`); 
+                //console.log(res.data[0]);
+                return res.data; // Returns it as Promise
+            }
+            catch(err)
+            {
+                console.log(err);
+                displayGeneralError(true);
+                return [];
+            }        
+        }
+
+        function validateNumberOfSites(siteAddress)
+        {
+            if(siteAddress.split(',').length > 3)
+            {
+                alert("Please enter only 3 sites");
+                return false;
+            }
+            return true;
+        }
+        
+        async function Do()
+        {
+            displayGeneralError(false);
+            var btn = document.getElementById("button");
+            btn.disabled = true;
+            var siteAddress = document.getElementById("siteAddress").value;
+            if (siteAddress && validateNumberOfSites(siteAddress)){
+                let results = await FetchHtml(siteAddress); // Get html from the promise
+                addResultsToPage(results);
+            } else {
+                displayGeneralError(true);
+            }
+            btn.disabled = false;
+            //alert(results);
+        }
+        </script>
+    </head>
+    <body>
+        <h1>Does ketch tag exist?</h1>
+            <label for="fname">Site address</label><br>
+            <textarea type="text" id="siteAddress" name="siteAddress" rows="4" cols="50" placeholder="Enter up to 3 website urls separated by commas"></textarea><br>
+            <button id="button" onclick="Do()">Check</button>
+            <br>
+            <span id="error-text" class='error' style='display:none'>There was an error checking your sites. Please check the addresses and try again.</span>
+            <br>
+            <h3>Results</h3>
+            <div id="results" class="grid-container"></div>
+    </body>
+</html>
