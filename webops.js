@@ -17,6 +17,7 @@ const checkForKetchInstalled = async (urls) => {
         try {
             const browser = await puppeteer.launch({
                 ignoreHTTPSErrors: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
             const page = await browser.newPage();
             let results = [];
@@ -36,6 +37,7 @@ const checkForKetchInstalled = async (urls) => {
             browser.close();
             return results;
         } catch (e) {
+            console.log(e);
             return e;
         }
 }
