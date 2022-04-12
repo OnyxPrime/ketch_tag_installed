@@ -1,6 +1,6 @@
 const dateUtils = require('./utilities/v1/dateUtils.js');
-const fileMain = require('./utilities/v1/fileMain.js');
-const serverMain = require('./utilities/v1/serverMain.js');
+const fileMain = require('./main/fileMain.js');
+const serverMain = require('./main/serverMain.js');
 
 const { Command, Option } = require('commander');
 const program = new Command();
@@ -17,7 +17,12 @@ program.command('file')
   .option('-o, --output <filepath>', 'filename to output results', `./results/results-${dateUtils.formatDate(Date.now())}.csv`)
   .option('-c, --concurrency <amount>', 'number of concurrent requests to make', 5)
   .action((options) => {
-    fileMain.run(options.input, options.output, options.concurrency, options.test);
+      if (!options.test && !options.input) {
+          console.log ('Please specify either --test or --input');
+      }
+      else {
+        fileMain.run(options.input, options.output, options.concurrency, options.test);
+      }
   });
 
 program.command('web')

@@ -1,6 +1,6 @@
 const runProcess = async (input, output, concurrency, test = false) => {
-    const fileops = require('./fileUtils.js');
-    const webopsV2 = require('../v2/webUtils.v2.js');
+    const fileops = require('../utilities/v1/fileUtils.js');
+    const webopsV2 = require('../utilities/v2/webUtils.v2.js');
     const testUrls = ["https://www.google.com", "https://www.ketch.com", "https://www.patreon.com"];
 
     var hrstart = process.hrtime()
