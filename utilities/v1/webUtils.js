@@ -21,6 +21,7 @@ const checkForKetchInstalled = async (urls) => {
             });
             const page = await browser.newPage();
             let results = [];
+            let count = 1;
             for (let i of urls) {
                 let pageCheckStart = process.hrtime();
                 try{
@@ -33,6 +34,7 @@ const checkForKetchInstalled = async (urls) => {
                     let pageCheckEnd = process.hrtime(pageCheckStart); 
                     results.push({url: i, result: false, pageCheckTime: (pageCheckEnd[0] * 1000000000 + pageCheckEnd[1]) / 1000000, error: e});
                 }
+                process.stdout.write(`${count++}\r`);
             };    
             browser.close();
             return results;

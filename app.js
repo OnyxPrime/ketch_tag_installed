@@ -1,56 +1,31 @@
+const dateUtils = require('./utilities/v1/dateUtils.js');
+const fileMain = require('./utilities/v1/fileMain.js');
+const serverMain = require('./utilities/v1/serverMain.js');
 
-const fs = require('fs');
-const fileops = require('./fileops.js');
-const webops = require('./webops.js');
-const testUrls = ["https://www.google.com", "https://www.ketch.com", "https://www.patreon.com"];
+const { Command, Option } = require('commander');
+const program = new Command();
 
+program
+  .name('ketch-tag-checker')
+  .description('Check whether or not Ketch Smart Tag is installed on a list of urls')
+  .version('0.1.0');
 
+program.command('file')
+  .description('Run Ketch Smart Tag checker on a list of urls from a file.')
+  .addOption(new Option('-i, --input <filepath>', 'filename containing list of urls').conflicts('test'))
+  .addOption(new Option('-t, --test', 'Run test urls').conflicts('input'))
+  .option('-o, --output <filepath>', 'filename to output results', `./results/results-${dateUtils.formatDate(Date.now())}.csv`)
+  .option('-c, --concurrency <amount>', 'number of concurrent requests to make', 5)
+  .action((options) => {
+    fileMain.run(options.input, options.output, options.concurrency, options.test);
+  });
 
-const runProcess = async () => {
-    var hrstart = process.hrtime()
-    var urls = await fileops.getUrlsFromFile('OTCurls_Oct14.2021.txt');
-    console.log(urls.length);
-    var results = await webops.checkForKetchInstalled(urls);
-    //var results = await webops.checkForKetchInstalled(testUrls);
-    fileops.writeResultsToFile(results);
-    var hrend = process.hrtime(hrstart);
-    console.log(`Execution time (ms): ${(hrend[0] * 1000000000 + hrend[1]) / 1000000}`);
-}
+program.command('web')
+  .description('Run Ketch Smart Tag Checker as a web page.')
+  .addOption(new Option('-p, --port <number>', 'port number').default(3000).env('PORT'))
+  .option('-c, --concurrency <int>', 'number of concurrent requests to make', 3)
+  .action((options) => {
+    serverMain.run(options.port);
+  });
 
-const runEvaluation = async (urls) => {
-    var results = await webops.checkForKetchInstalled(urls);
-    return results;
-}
-//runProcess();
-
-const http = require('http');
-const url = require('url');
-const handler = async (req, res) => {
-    var base = 'https://' + req.headers.host + '/';
-    const parsedUrl = new url.URL(req.url, base);
-    res.end;
-
-    if(parsedUrl.pathname === '/api/evaluate' && parsedUrl.searchParams.get('urls')){
-        const urls = parsedUrl.searchParams.get('urls')?.split(',');
-        console.log(urls);
-        if (urls.length > 3){
-            res.writeHead(400, { 'Content-Type': 'text/plain' });
-            res.end('Too many urls');
-        }
-        else{
-            const results = await runEvaluation(urls);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(results));
-        }        
-    } else if (parsedUrl.pathname === '/') {
-        res.writeHead(200, { 'content-type': 'text/html' })
-        fs.createReadStream('index.html').pipe(res)
-    
-    }else {
-        res.writeHead(404, {'Content-type':'text/plain'});
-        res.end();
-    };
-}
-const server = http.createServer(handler);
-
-server.listen(process.env.PORT || 3000)
+program.parse(process.argv);

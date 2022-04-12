@@ -31,9 +31,9 @@ async function getUrlsFromFile(filename) {
     return urls;  
   }
 
-  const writeResultsToFile = async (results) => {    
+  const writeResultsToFile = async (output, results) => {    
     try {
-        var file = fs.createWriteStream(`results-${formatDate(Date.now())}.csv`, { flags: 'a'});
+        var file = fs.createWriteStream(output, { flags: 'a'});
         file.write('url,Ketch Installed,Process Time (ms)\n');
         results.forEach(line => {
             file.write(`${line.url},${line.result},${line.pageCheckTime}`);
