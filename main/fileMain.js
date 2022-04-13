@@ -17,4 +17,26 @@ const runProcess = async (input, output, concurrency, test = false) => {
     console.log(`Execution time (ms): ${(hrend[0] * 1000000000 + hrend[1]) / 1000000}`);
 }
 
-module.exports = { run: runProcess };
+const getCommand = () => {
+    const { Command, Option } = require('commander');
+    const dateUtils = require('../utilities/v1/dateUtils.js');
+
+    return new Command('file')
+        .description('Run Ketch Smart Tag checker on a list of urls from a file.')
+        .addOption(new Option('-i, --input <filepath>', 'filename containing list of urls').conflicts('test'))
+        .addOption(new Option('-t, --test', 'Run test urls').conflicts('input'))
+        .option('-o, --output <filepath>', 'filename to output results', `./results/results-${dateUtils.formatDate(Date.now())}.csv`)
+        .option('-c, --concurrency <amount>', 'number of concurrent requests to make', 5)
+        .action((options) => {
+            if (!options.test && !options.input) {
+                console.log ('Please specify either --test or --input');
+            }
+            else {
+            runProcess(options.input, options.output, options.concurrency, options.test);
+            }
+        });
+}
+
+module.exports = { 
+    getCommand: getCommand
+};

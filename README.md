@@ -26,13 +26,21 @@ Options:
  - `-h, --help               display help for command`
 
  ## Containerizing
+Currently the containerized version of the Ketch Tag Detector is configured to run in `web` mode.
+
  ```shell
  docker build -t ketch/ketch_tag_detector:1.0 .
 
- docker run -dp 3000:3000 ketch_tag_detector
+ docker run -dp 3000:3000 ketch/ketch_tag_detector:1.0
  ```
 
+To change the port at which the webpage is being served on the host, change the number to the left of the `:` in the `docker run` command above.
+```shell
+docker run -dp 8000:3000 ketch/ketch_tag_detector:1.0
+``` 
+
  ## Technologies used
- - Node
- - Puppeteer
- - Bluebird
+ - [Node.js](https://nodejs.org)
+ - [Puppeteer](https://github.com/puppeteer/puppeteer)
+ - [Bluebird](http://bluebirdjs.com/docs/getting-started.html)
+ - [Docker](https://www.docker.com/)

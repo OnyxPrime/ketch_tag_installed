@@ -34,4 +34,19 @@ const runServer = async (port, concurrency) => {
     console.log('Server listening on http://localhost:' + port);
     server.listen(port || 3000)
 }
-module.exports = { run: runServer };
+
+const getCommand = () => { 
+    const { Command, Option } = require('commander');
+    return new Command('web')
+        .description('Run Ketch Smart Tag Checker as a web page.')
+        .addOption(new Option('-p, --port <number>', 'port number').default(3000).env('PORT'))
+        .option('-c, --concurrency <int>', 'number of concurrent requests to make', 3)
+        .action((options) => {
+            runServer(options.port);
+        });
+}
+
+
+module.exports = { 
+    getCommand: getCommand
+};
