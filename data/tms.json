@@ -1,0 +1,9 @@
+[
+    {"name": "Adobe Tag Manager", "identifier": "adobetagmanager.com"},
+    {"name": "Google Tag Manager", "identifier": "googletagmanager.com"},
+    {"name": "Tealium", "identifier": "tiqcdn"},
+    {"name": "Tealium", "identifier": "tealium"},
+    {"name": "Tag Commander", "identifier": "tagcommander"},
+    {"name": "Piwik Pro", "identifier": "marketing.containers.piwik"},
+    {"name": "Signal", "identifier": "btstatic.com"}
+]
