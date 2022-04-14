@@ -34,15 +34,9 @@ async function getUrlsFromFile(filename) {
   const writeResultsToFile = async (output, results) => {    
     try {
         var file = fs.createWriteStream(output, { flags: 'a'});
-        file.write('url,Ketch Installed,Process Time (ms)\n');
+        file.write('url,Ketch Installed,Process Time (ms),banners,tag managers,errors\n');
         results.forEach(line => {
-            file.write(`${line.url},${line.result},${line.pageCheckTime}`);
-            if (line.error) {
-                file.write(`,${line.error}\n`);
-            }
-            else {
-                file.write('\n');
-            }
+            file.write(`${line.url},${line.result},${line.pageCheckTime},${line.banners},${line.tagManagers},${line.error}\n`);
         });
     } catch (e) {
         return e;
