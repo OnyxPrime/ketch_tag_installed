@@ -5,8 +5,8 @@ const { Command } = require('commander');
 const program = new Command();
 
 program
-  .name('ketch-tag-checker')
-  .description('Check whether or not Ketch Smart Tag is installed on a list of urls')
+  .name('Website Analyzer')
+  .description('Analyze websites for Tag Managers, CMP, and Cookies')
   .version('0.1.0');
 
 program.addCommand(fileMain.getCommand());

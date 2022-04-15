@@ -1,5 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
+const { UrlInfo } = require('../v4/urlInfo.js');
 
 const formatDate = (date) => {
     var d = new Date(date),
@@ -31,7 +32,7 @@ async function getUrlsFromFile(filename) {
     return urls;  
   }
 
-  const writeResultsToFile = async (output, results) => {    
+const writeResultsToFile = async (output, results) => {    
     try {
         var file = fs.createWriteStream(output, { flags: 'a'});
         file.write('url,Ketch Installed,Process Time (ms),banners,tag managers,errors\n');
@@ -43,6 +44,18 @@ async function getUrlsFromFile(filename) {
     }
 }
 
+const writeNewResultsToFile = async (output, results) => {    
+  try {
+      var file = fs.createWriteStream(output, { flags: 'a'});      
+      file.write(UrlInfo.getKeyString() + '\n');
+      results.forEach(line => {
+          file.write(line.toString() + '\n');
+      });
+  } catch (e) {
+      return e;
+  }
+}
+
 const loadJsonFile = async (filename) => {
     try {
         return JSON.parse(fs.readFileSync(filename));
@@ -52,4 +65,4 @@ const loadJsonFile = async (filename) => {
     }
 }
 
-module.exports = { getUrlsFromFile, writeResultsToFile, loadJsonFile };
+module.exports = { getUrlsFromFile, writeResultsToFile, writeNewResultsToFile, loadJsonFile };

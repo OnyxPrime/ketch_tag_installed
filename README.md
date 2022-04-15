@@ -9,13 +9,21 @@ There are 2 modes this application runs:
 When run in file processing mode, the application will run through a list of URLs from a specified file. The results from the processing will then be output to a file containing the URL, whether or not it contains the Ketch Smart Tag, time it took to process, and an error, if one occurred.
 
 Options:
-- `-i, --input <filepath>      filename containing list of url`
-- `-t, --test                  Run test urls`
-- `-o, --output <filepath>     filename to output results (default: "./results/results-2022-04-12.csv")`
-- `-c, --concurrency <amount>  number of concurrent requests to make (default: 5)`
-- `-h, --help                  display help for command`
+- `-i, --input <filepath>                   filename containing list of url`
+- `-t, --test                               Run test urls`
+- `-tm, --tag-managers                      Identify Tag Managers`
+- `-cmp, --consent-management-providers     Identify Consent Management Providers`
+- `-ck, --cookies                           Identify first and third party cookies`
+- `-u, --url                                Runs a single URL specified`
+- `-o, --output <filepath>                  filename to output results (default: "./results/results-2022-04-12.csv")`
+- `-c, --concurrency <amount>               number of concurrent requests to make (default: 5)`
+- `-h, --help                               display help for command`
 
 An `--input` path is required, unless the `--test` flag is set.
+
+```shell
+node app.js file -u https://ketch.com -o ./results/test2.csv
+```
 
 ## Web server
 When run in web server mode, the application will server a web page allowing the user to enter up to 3 URLs for processing. Upon completion of processing, the results are returned and displayed on the web page. 
@@ -24,6 +32,10 @@ Options:
  - `-p, --port <number>      port number (default: 3000, env: PORT)`
  - `-c, --concurrency <int>  number of concurrent requests to make (default: 3)`
  - `-h, --help               display help for command`
+
+ ```shell
+ node app.js web -p 3001
+ ```
 
  ## Containerizing
 Currently the containerized version of the Ketch Tag Detector is configured to run in `web` mode.

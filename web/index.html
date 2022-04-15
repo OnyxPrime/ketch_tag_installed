@@ -4,8 +4,8 @@
         <style>
             .grid-container {
                 display: grid;
-                grid-template-columns: auto auto;
-                width: 50em;
+                grid-template-columns: auto auto auto auto auto;
+                width: 65em;
             }
             .grid-item {
                 border: 1px solid rgba(0, 0, 0, 0.8);
@@ -20,20 +20,46 @@
             }
             </style> 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>     
-        <script>        
+        <script>     
+        function getFirstPartyCookieString(cookies){
+            var cookieString = "";
+            for (var i = 0; i < cookies.length; i++) {                
+                    cookieString += cookies[i].name + "<br>";
+            }
+            return cookieString;
+        }   
+        function getThirdPartyCookieString(cookies){
+            var cookieString = "";
+            for (var i = 0; i < cookies.length; i++) {                
+                    cookieString += cookies[i].name + ' : ' + cookies[i].domain + "<br>";
+            }
+            return cookieString;
+        }
         function addResultsToPage(results) {
             var resultsDiv = document.getElementById("results");
-            resultsDiv.innerHTML = '<div class="grid-item grid-heading">URL</div><div class="grid-item grid-heading">Has Ketch Smart Tag?</div>';
+            resultsDiv.innerHTML = '<div class="grid-item grid-heading">URL</div><div class="grid-item grid-heading">Banner</div><div class="grid-item grid-heading">Tag Manager</div><div class="grid-item grid-heading">First Party Cookies</div><div class="grid-item grid-heading">Third Party Cookies</div>';
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];
                 var urlDiv = document.createElement("div");
                 urlDiv.className = "grid-item";
                 urlDiv.innerHTML = `${result.url}`;
-                var resultDiv = document.createElement("div")
-                resultDiv.className = "grid-item";
-                resultDiv.innerHTML = `${result.result}`;
+                var bannerDiv = document.createElement("div")
+                bannerDiv.className = "grid-item";
+                bannerDiv.innerHTML = `${result.banner}`;
+                var tagManagerDiv = document.createElement("div")
+                tagManagerDiv.className = "grid-item";
+                tagManagerDiv.innerHTML = `${result.tagManager}`;
+                var firstPartyCookieDiv = document.createElement("div")
+                firstPartyCookieDiv.className = "grid-item";
+                firstPartyCookieDiv.innerHTML = `${getFirstPartyCookieString(result.cookies.firstPartyCookies)}`;
+                var thirdPartyCookieDiv = document.createElement("div")
+                thirdPartyCookieDiv.className = "grid-item";
+                thirdPartyCookieDiv.innerHTML = `${getThirdPartyCookieString(result.cookies.thirdPartyCookies)}`;
                 resultsDiv.appendChild(urlDiv);
-                resultsDiv.appendChild(resultDiv);
+                resultsDiv.appendChild(bannerDiv);
+                resultsDiv.appendChild(tagManagerDiv);
+                resultsDiv.appendChild(firstPartyCookieDiv);
+                resultsDiv.appendChild(thirdPartyCookieDiv);
             }
         }
 
@@ -89,7 +115,7 @@
         </script>
     </head>
     <body>
-        <h1>Does ketch tag exist?</h1>
+        <h1>Website Privacy Analysis</h1>
             <label for="fname">Site address</label><br>
             <textarea type="text" id="siteAddress" name="siteAddress" rows="4" cols="50" placeholder="Enter up to 3 website urls separated by commas"></textarea><br>
             <button id="button" onclick="Do()">Check</button>

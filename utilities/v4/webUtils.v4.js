@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const bluebird = require("bluebird");
+const {UrlInfo} = require('./urlInfo');
 
 const withBrowser = async (fn) => {
 	const browser = await puppeteer.launch({
@@ -33,6 +34,9 @@ const chkForKetch = async (page) => {
         }    
         return false;
     })
+}
+
+const analyzeForKetch = (request) => {
 }
 
 const analyzeForTagManager = (request, tmps) => {
@@ -71,6 +75,13 @@ const analyzeRequest = (request, tms, cmps) => {
     let tagManager = analyzeForTagManager(request, tms);
 
     return {ketchExists: bannerInfo.ketchExists, banner: bannerInfo.banner, tagManager: tagManager};
+}
+
+const analyzePageCookies = async (page) => {
+    let t = await page._client.send('Network.getAllCookies');
+    let firstPartyCookies = await page.cookies();
+    let thirdPartyCookies = t.cookies.filter(o => !firstPartyCookies.some(p => p.name === o.name));
+    return {firstPartyCookies: firstPartyCookies, thirdPartyCookies: thirdPartyCookies};
 }
 
 const checkForKetchInstalled = async (urls, concurrency = 5) => {    
@@ -114,10 +125,10 @@ const checkForKetchInstalled = async (urls, concurrency = 5) => {
         }
 }
 
-const analyzeUrls = async (urls, concurrency = 5, tms, cmps) => {try {
+const analyzeUrls = async (analysisOptions) => {try {
     return await withBrowser(async (browser) => {
         let count = 1;
-        return bluebird.map(urls, async (url) => {
+        return bluebird.map(analysisOptions.urls, async (url) => {
             return withPage(browser)(async (page) => {
                 let pageCheckStart = process.hrtime();
                 let r;
@@ -125,28 +136,41 @@ const analyzeUrls = async (urls, concurrency = 5, tms, cmps) => {try {
                     let ketchExists = false;
                     let banners = [];
                     let tagManagers = [];
+                    let cookies;
                     await page.setRequestInterception(true);
                     page.on('request', (request) => {
-                        let analysis = analyzeRequest(request, tms, cmps);    
-                        if (analysis.ketchExists) ketchExists = true;
-                        banners.push(analysis.banner);
-                        tagManagers.push(analysis.tagManager);
+                        // Analyze request to see if it's calling a known a CMP
+                        if (analysisOptions.cmps) {
+                            var banner = analyzeForBanner(request, analysisOptions.cmps);
+                            if (banner.ketchExists) ketchExists = true;
+                            banners.push(banner.banner);
+                        }
+
+                        // Analyze request to see if it's calling a known tag manager
+                        if (analysisOptions.tms) {
+                            tagManagers.push(analyzeForTagManager(request, analysisOptions.tms));
+                        } 
                         request.continue();                                
                     });
                     await page.goto(url, {waitUntil: 'networkidle0'});
+
+                    //Get cookies
+                    if (analysisOptions.cookies) {
+                        cookies = await analyzePageCookies(page);
+                    }
                     let pageCheckEnd = process.hrtime(pageCheckStart); 
                     let uniqueBanners = [...new Set(banners)].filter(Boolean).join(';');
                     let uniqueTagManagers = [...new Set(tagManagers)].filter(Boolean).join(';');
-                    r = {url: url, result: ketchExists, pageCheckTime: (pageCheckEnd[0] * 1000000000 + pageCheckEnd[1]) / 1000000, banners: uniqueBanners, tagManagers: uniqueTagManagers, error: ''};
+                    r = new UrlInfo(url, ketchExists, uniqueBanners, uniqueTagManagers, (pageCheckEnd[0] * 1000000000 + pageCheckEnd[1]) / 1000000, '', cookies);
                 }
                 catch (e) {
                     let pageCheckEnd = process.hrtime(pageCheckStart);
-                    r = {url: url, result: false, pageCheckTime: (pageCheckEnd[0] * 1000000000 + pageCheckEnd[1]) / 1000000, banners: '', tagManagers: '', error: e};
+                    r = new UrlInfo(url, false, '', '', (pageCheckEnd[0] * 1000000000 + pageCheckEnd[1]) / 1000000, e);
                 }
                 process.stdout.write(`${count++} urls processed.\r`);
                 return r;
             });
-        }, {concurrency: concurrency});
+        }, {concurrency: analysisOptions.concurrency});
     });
 } catch (e) {
     console.log(e);

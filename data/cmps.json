@@ -1,6 +1,6 @@
 [
     { "name": "Ketch", "identifier": "ketchcdn"},
-    { "name": "OneTrust", "identifier": "'cookielaw.org"},
+    { "name": "OneTrust", "identifier": "cookielaw.org"},
     { "name": "Cookiebot", "identifier": "cookiebot"},
     { "name": "TrustArc", "identifier": "trustarc"},
     { "name": "TermsFeed", "identifier": "termsfeed.com"},
